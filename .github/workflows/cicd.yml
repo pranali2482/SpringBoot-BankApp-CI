@@ -134,5 +134,9 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add .
-          git commit -m "Update image tag to ${{ env.BUILD_NUMBER }}"
+          if git diff --cached --quiet; then
+          echo "No changes to commit"
+          else
+          git commit -m "Update image tag to ${{ env.RUN_NUMBER }}"
           git push
+          fi
