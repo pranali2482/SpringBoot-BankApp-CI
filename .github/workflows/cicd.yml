@@ -132,7 +132,7 @@ jobs:
           path: deployment-repo
       - name: Update Image Tag in Manifest
         run: |
-          sed -i 's|bankapp:.*|bankapp:${{ env.BUILD_NUMBER }}|g' deployment-repo/bankapp/bankapp-ds.yml
+          sed -i 's|bankapp:.*|bankapp:${{ needs.build_project_and_sonar_scan.outputs.build_number }}|g' deployment-repo/bankapp/bankapp-ds.yml
       - name: Commit and Push Changes
         run: |
           cd deployment-repo
