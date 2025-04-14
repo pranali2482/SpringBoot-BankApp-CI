@@ -55,8 +55,6 @@ jobs:
   build_project_and_sonar_scan:
     runs-on: self-hosted
     needs: test
-    outputs:
-      build_number: ${{ github.run_number }}
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 17
@@ -81,7 +79,7 @@ jobs:
     runs-on: self-hosted
     needs: build_project_and_sonar_scan
     env:
-      BUILD_NUMBER: ${{ needs.build_project_and_sonar_scan.outputs.build_number }}
+      BUILD_NUMBER: ${{ github.run_number }}  # Replacing build_number with run_number
     steps:
       - uses: actions/checkout@v4
       - name: Download JAR artifact
@@ -106,14 +104,14 @@ jobs:
         with:
           context: .
           push: true
-          tags: 266869541345.dkr.ecr.ap-south-1.amazonaws.com/bankapp:${{ env.BUILD_NUMBER }}
+          tags: 266869541345.dkr.ecr.ap-south-1.amazonaws.com/bankapp:${{ env.BUILD_NUMBER }}  # Using run_number
           file: ./Dockerfile
 
   deploy_to_kubernetes_with_argocd:
     runs-on: self-hosted
     needs: build_docker_image_and_push_to_ECR
     env:
-      BUILD_NUMBER: ${{ needs.build_project_and_sonar_scan.outputs.build_number }}
+      BUILD_NUMBER: ${{ github.run_number }}  # Replacing build_number with run_number
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
@@ -127,3 +125,14 @@ jobs:
           repository: Pranalipokharkar/SpringBoot-BankApp-CD
           token: ${{ secrets.GH_PAT }}
           path: deployment-repo
+      - name: Update Image Tag in Manifest
+        run: |
+          sed -i 's|bankapp:.*|bankapp:${{ env.BUILD_NUMBER }}|g' deployment-repo/bankapp/bankapp-ds.yml  # Using run_number
+      - name: Commit and Push Changes
+        run: |
+          cd deployment-repo
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Update image tag to ${{ env.BUILD_NUMBER }}"
+          git push
