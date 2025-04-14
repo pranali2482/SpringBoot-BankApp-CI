@@ -103,7 +103,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: 054037106953.dkr.ecr.ap-south-1.amazonaws.com/bankapp:${{ env.BUILD_NUMBER }}
+          tags: 266869541345.dkr.ecr.ap-south-1.amazonaws.com/bankapp:${{ env.BUILD_NUMBER }}
           file: ./Dockerfile
 
   deploy_to_kubernetes_with_argocd:
