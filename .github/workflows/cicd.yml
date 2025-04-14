@@ -79,7 +79,7 @@ jobs:
     runs-on: self-hosted
     needs: build_project_and_sonar_scan
     env:
-      BUILD_NUMBER: ${{ github.run_number }}  # Replacing build_number with run_number
+      RUN_NUMBER: ${{ github.run_number }}  # Using GitHub Actions run number for versioning
     steps:
       - uses: actions/checkout@v4
       - name: Download JAR artifact
@@ -104,14 +104,14 @@ jobs:
         with:
           context: .
           push: true
-          tags: 266869541345.dkr.ecr.ap-south-1.amazonaws.com/bankapp:${{ env.BUILD_NUMBER }}  # Using run_number
+          tags: 266869541345.dkr.ecr.ap-south-1.amazonaws.com/bankapp:${{ env.RUN_NUMBER }}
           file: ./Dockerfile
 
   deploy_to_kubernetes_with_argocd:
     runs-on: self-hosted
     needs: build_docker_image_and_push_to_ECR
     env:
-      BUILD_NUMBER: ${{ github.run_number }}  # Replacing build_number with run_number
+      RUN_NUMBER: ${{ github.run_number }}  # Using GitHub Actions run number for versioning
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
@@ -127,7 +127,7 @@ jobs:
           path: deployment-repo
       - name: Update Image Tag in Manifest
         run: |
-          sed -i 's|bankapp:.*|bankapp:${{ env.BUILD_NUMBER }}|g' deployment-repo/bankapp/bankapp-ds.yml  # Using run_number
+          sed -i 's|bankapp:.*|bankapp:${{ env.RUN_NUMBER }}|g' deployment-repo/bankapp/bankapp-ds.yml
       - name: Commit and Push Changes
         run: |
           cd deployment-repo
@@ -135,8 +135,8 @@ jobs:
           git config user.email "actions@github.com"
           git add .
           if git diff --cached --quiet; then
-          echo "No changes to commit"
+            echo "No changes to commit"
           else
-          git commit -m "Update image tag to ${{ env.RUN_NUMBER }}"
-          git push
+            git commit -m "Update image tag to ${{ env.RUN_NUMBER }}"
+            git push
           fi
