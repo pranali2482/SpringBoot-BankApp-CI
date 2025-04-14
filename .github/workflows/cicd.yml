@@ -1,4 +1,4 @@
-name: CICD Pipeline
+name: Spring-Boot-BankApp CI Pipeline
 
 on:
   push:
