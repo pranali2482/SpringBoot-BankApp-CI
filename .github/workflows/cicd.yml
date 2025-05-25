@@ -130,7 +130,7 @@ jobs:
 
     - name: Update BankApp image tag in Helm values.yaml
       run: |
-        sed -i 's/^  tag:.*$/  tag: "${RUN_NUMBER}"/' deployment-repo/appchart/values.yaml
+        sed -i 's/^  tag:.*$/  tag: "${RUN_NUMBER}"/' deployment-repo/helm/appchart/values.yaml
 
     - name: Commit and Push Changes
       run: |
